@@ -1,12 +1,14 @@
-<li class="nav-header">Articles</li>
-{?Articles}
-	{#Articles}
-		<li>
-			<a class="submenu-article" data-article-link="{href}" href="article/{Id}">
-				{Slug|t} {Id|t} {CreatedOn|t}
-			</a>
-		</li>
-	{/Articles}
-{:else}
-	<li><a>No articles yet!</a></li>
-{/Blogs}
+<header is-submenu="">
+	<div class="subnav subnav-fixed">
+		<ul class="nav nav-pills pull-left">	
+			{#Types}
+				<li class="active"><a data-toggle-view="{Id}">{Name}</a></li>
+			{/Type}
+		</ul> 
+	</div>  
+</header>
+<div id="article-views-placeholder">
+	<div id="article-views-main" class="container-fluid">
+
+	</div>
+</div>

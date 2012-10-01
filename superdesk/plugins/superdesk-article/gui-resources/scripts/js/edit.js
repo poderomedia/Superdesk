@@ -3,20 +3,28 @@ define
     'gizmo/superdesk', 'jquery', 
     config.guiJs('superdesk/article', 'models/article-ctx'),
     config.guiJs('superdesk/article', 'models/article'),
-    'tmpl!superdesk/article>list'
+    'tmpl!superdesk/article>list',
+    'tmpl!superdesk/article>item'
 ],
 function(giz, $, ArticleCtx, Article)
 {
-    var 
+    var dummyTypes = {1: 'Text', 2: 'Web', 3: 'Smartphone', 4: 'Tablet'},
     ItemView = giz.View.extend
     ({
         init: function()
         {
-            
+            //this.setElement($('<div />'));
         },
-        render: function()
+        render: function(ctx)
         {
-            
+            var cssClass = 'ctx-'+ctx.get('Type'),
+                content = ctx.get('Content'),
+                self = this;
+            $.tmpl('superdesk/article>item', {ViewClass: cssClass, Content:content}, function()
+            { 
+                self.setElement($(arguments[1]));
+            });
+            return this;
         }
     }),
     ListView = giz.View.extend
@@ -40,12 +48,7 @@ function(giz, $, ArticleCtx, Article)
         },
         addItem : function(ctx)
         {
-            var cssClass = 'ctx-'+ctx.get('Type'),
-                container = $('<div class="ctx '+cssClass+'"/>'),
-                view = $('<div class="view" />');
-            
-            container.html(ctx.get('Content')).appendTo(view.appendTo($('#main', this.el)));
-            
+            $('#article-views-main', self.el).append((new ItemView).render(ctx).el);
         },
         render: function()
         {
