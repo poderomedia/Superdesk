@@ -1,5 +1,5 @@
 <div class="article-view">
-	<div class="ctx {ViewClass}" data-placeholder-for="item">
-		{Content|t}
+	<div class="ctx {ViewClass}">
+		{Content|s}
 	</div>
 </div>

@@ -31,14 +31,40 @@ from ally.exception import InputError
 
 
 DATA = { 'article': 'Ganz besonders, diese Elsässer',
-         'article_content': '<figure><div class="grey-border"><img src="../prominent/pictures/article-large-1.jpg" alt=""></div><p>Besorgte «Glaibasler» stören die Tattoo-Harmonie. Foto: Keystone</p></figure>\
-<p>Freunde aus Zürich, Bern oder einem anderen Gebiet jenseits des Juras kann man immer wieder verblüffen, indem man sich mit ihnen ins 10er-Tramm setzt. Richtung Rodersdorf. Man steigt in Leymen aus und sagt beiläufig, das sei Frankreich – sofern dies die Freunde nicht schon selbst erkannt haben. Das Erstaunen ist jeweils gross: mit dem Tram ins Ausland! Naja, bitte sehr – wir sind hier in der Region Basel, wir denken über die Grenzen hinaus, unser Flughafen liegt ja auch im Ausland, man ist weltoffen.<br>\
-Denkste! Auf den Flughafen bei Blotzheim fährt man hinter hohen Grenzzäunen, und wo sich die mehr oder weniger grüne Grenze vom Bachgraben in Basel bis nach Rodersdorf erstreckt, wachsen virtuelle Mauern. Irgendwie wird uns das Gebiet hinter der Grenze – der Sundgau und das ganze Elsass – immer fremder, unbekannter als auch schon.<br>\
+         'article_content': '<article>            <div class="article-head">\
+<p class="article-section">DAS ELSASS</p>\
+<p class="article-date">4. Mai 2012</p>\
+</div>\
+<div class="article-title">\
+<h1 contenteditable="true" class="editable">Ganz besonders, diese Elsässer</h1>\
+<h3 contenteditable="true" class="editable">Das Elass aus unseren Träumen gibt es nicht mehr. Ein Blick auf eine entschlummernde Region.</h3>\
+<h4>Von Alain Claude Sulzer (Text) und Mark Niedermann (Fotos)</h4>\
+</div>\
+<div class="article-images">\
+  <figure>\
+<div>\
+  <a href="#" class="zoom">Zoom</a>\
+<img alt="" src="pictures/article-pic-tablet.jpg">\
+</div>\
+<p>Besorgte «Glaibasler» stören die Tattoo-Harmonie. Foto: Keystone</p>\
+<figurecaption>Elsässer Kontraste: Farbige Hausfassaden und schnelle Vehikel in verschlafenen Dörfern.</figurecaption>\
+  </figure>\
+  <ul>\
+  <li><a href="#"><img src="pictures/article-small-1.jpg" alt=""></a></li>\
+  <li><a href="#"><img src="pictures/article-small-2.jpg" alt=""></a></li>\
+  <li><a href="#"><img src="pictures/article-small-3.jpg" alt=""></a></li>\
+  <li><a href="#"><img src="pictures/article-small-4.jpg" alt=""></a></li>\
+  </ul>\
+</div>\
+  <div class="article-text">\
+<p contenteditable="true" class="editable">Freunde aus Zürich, Bern oder einem anderen Gebiet jenseits des Juras kann man immer wieder verblüffen, indem man sich mit ihnen ins 10er-Tramm setzt. Richtung Rodersdorf. Man steigt in Leymen aus und sagt beiläufig, das sei Frankreich &ndash; sofern dies die Freunde nicht schon selbst erkannt haben. Das Erstaunen ist jeweils gross: mit dem Tram ins Ausland! Naja, bitte sehr &ndash; wir sind hier in der Region Basel, wir denken über die Grenzen hinaus, unser Flughafen liegt ja auch im Ausland, man ist weltoffen.<br>\
+Denkste! Auf den Flughafen bei Blotzheim fährt man hinter hohen Grenzzäunen, und wo sich die mehr oder weniger grüne Grenze vom Bachgraben in Basel bis nach Rodersdorf erstreckt, wachsen virtuelle Mauern. Irgendwie wird uns das Gebiet hinter der Grenze &ndash; der Sundgau und das ganze Elsass &ndash; immer fremder, unbekannter als auch schon.<br>\
 Dem hin und wieder Durchreisenden, Durchwandernden und Durchradelnden gefällt die Landschaft, und er kehrt gern in den immer seltener werdenden Restaurants ein. Aber irgendwie scheint das Leben in den Elsässer Dörfern zu erstarren, Beizen verschwinden, Läden sowieso, Leute sieht man kaum auf den Dorfstrassen und Gassen. Und auch in der Schweiz begegnet man Elsässern seltener. Je stärker die deutsche </p>\
-<p>Als wir Mitte der 70er-Jahre ein Haus im Elsass (richtiger: im Sundgau) bezogen, war der Krieg, der mehr als zwei Jahrzehnte zurücklag, noch gegenwärtig. Jene Einheimischen, die über 40 waren, hatten Erfahrungen damit gemacht, die den Menschen jenseits der Grenze, hinter der ich geboren war, erspart geblieben waren: als Evakuierte im unbesetzten Frankreich; als Zwangsarbeiter, die in den Osten umgesiedelt worden waren; als Soldaten in Russland oder als Eltern oder Geschwister von Söhnen und Brüdern, die nicht von dort zurückgekehrt waren; von den Juden, die deportiert worden waren, gar nicht zu reden (über die redete man auch nicht).</p>\
-<h3>Die liebenswürdige Rückständigkeit</h3>\
-<p>Als wir Mitte der 70er-Jahre ein Haus im Elsass (richtiger: im Sundgau) bezogen, war der Krieg, der mehr als zwei Jahrzehnte zurücklag, noch gegenwärtig. Jene Einheimischen, die über 40 waren, hatten Erfahrungen damit gemacht, die den Menschen jenseits der Grenze, hinter der ich geboren war, erspart geblieben waren: als Evakuierte im unbesetzten Frankreich; als Zwangsarbeiter, die in den Osten umgesiedelt worden waren; als Soldaten in Russland oder als Eltern oder Geschwister von Söhnen und Brüdern, die nicht von dort zurückgekehrt waren; von den Juden, die deportiert worden waren, gar nicht zu reden (über die redete man auch nicht).</p>\
-'
+<p contenteditable="true" class="editable">Als wir Mitte der 70er-Jahre ein Haus im Elsass (richtiger: im Sundgau) bezogen, war der Krieg, der mehr als zwei Jahrzehnte zurücklag, noch gegenwärtig. Jene Einheimischen, die über 40 waren, hatten Erfahrungen damit gemacht, die den Menschen jenseits der Grenze, hinter der ich geboren war, erspart geblieben waren: als Evakuierte im unbesetzten Frankreich; als Zwangsarbeiter, die in den Osten umgesiedelt worden waren; als Soldaten in Russland oder als Eltern oder Geschwister von Söhnen und Brüdern, die nicht von dort zurückgekehrt waren; von den Juden, die deportiert worden waren, gar nicht zu reden (über die redete man auch nicht).</p>\
+<h3 contenteditable="true" class="editable">Die liebenswürdige Rückständigkeit</h3>\
+<p contenteditable="true" class="editable">Als wir Mitte der 70er-Jahre ein Haus im Elsass (richtiger: im Sundgau) bezogen, war der Krieg, der mehr als zwei Jahrzehnte zurücklag, noch gegenwärtig. Jene Einheimischen, die über 40 waren, hatten Erfahrungen damit gemacht, die den Menschen jenseits der Grenze, hinter der ich geboren war, erspart geblieben waren: als Evakuierte im unbesetzten Frankreich; als Zwangsarbeiter, die in den Osten umgesiedelt worden waren; als Soldaten in Russland oder als Eltern oder Geschwister von Söhnen und Brüdern, die nicht von dort zurückgekehrt waren; von den Juden, die deportiert worden waren, gar nicht zu reden (über die redete man auch nicht).</p>\
+  </div>\
+</article>'
 }
 
 def createArticles():

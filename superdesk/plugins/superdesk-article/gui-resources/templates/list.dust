@@ -1,14 +1,14 @@
 <header is-submenu="">
 	<div class="subnav subnav-fixed">
-		<ul class="nav nav-pills pull-left">	
+		<ul class="nav nav-pills pull-left" id="article-views-ctrl">	
 			{#Types}
-				<li class="active"><a data-toggle-view="{Id}">{Name}</a></li>
-			{/Type}
+				<li data-toggle-view="{Id}"><a>{Name}</a></li>
+			{/Types}
 		</ul> 
 	</div>  
 </header>
-<div id="article-views-placeholder">
-	<div id="article-views-main" class="container-fluid">
+<div id="article-views-placeholder" class="container-fluid">
+	<div id="article-views-main">
 
 	</div>
 </div>
