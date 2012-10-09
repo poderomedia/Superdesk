@@ -4,10 +4,11 @@ function escape_dust(str){
 }
 
 function parseFunction(fnx, string, callback) {
-	var fnx = new RegExp(fnx+'\\((.*?)(\\);|\\))','gi');
+	var fnx = new RegExp(fnx+'(\\((.*?)\\);|\\((.*?)\\))','gi');
 	var formatx = ').format(';
-	return string.replace(fnx, function(str_fn, inside_fn){
+	return string.replace(fnx, function(str_fn, a, b, c){
 		fstr = '';
+		inside_fn = (b == '') ? c: b; 
 		if(inside_fn.indexOf(formatx)>-1) {
 			arr = inside_fn.split(formatx);
 			inside_fn = arr[0];
