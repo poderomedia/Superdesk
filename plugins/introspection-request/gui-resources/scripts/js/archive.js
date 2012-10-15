@@ -3,11 +3,11 @@ define
     'jquery',
     'jquery/superdesk',
     'gizmo/superdesk',
-    config.guiJs('superdesk/request', 'models/request'),
-    'tmpl!superdesk/request>list',
-    'tmpl!superdesk/request>item'
+    config.guiJs('livedesk', 'models/blog'),
+    'tmpl!livedesk>archive/list',
+    'tmpl!livedesk>archive/item'
 ],
-function($, superdesk, giz, Request)
+function($, superdesk, giz, Blog)
 {
     var 
     ItemView = giz.View.extend
@@ -16,20 +16,20 @@ function($, superdesk, giz, Request)
         model: null,
         events: 
         {
-            '.view': { 'click': 'loadRequest' }
+            '.view': { 'click': 'loadBlog' }
         },
-        loadRequest: function(evt)
+        loadBlog: function(evt)
         {
             superdesk.showLoader();
-            var theRequest = $(evt.target).attr('data-Request-link'), self = this;
+            var theBlog = $(evt.target).attr('data-blog-link'), self = this;
             superdesk.getAction('modules.livedesk.edit')
             .done(function(action)
             {
                 var callback = function()
                 { 
-                    require([superdesk.apiUrl+action.ScriptPath], function(EditApp){ EditApp(theRequest); }); 
+                    require([superdesk.apiUrl+action.ScriptPath], function(EditApp){ EditApp(theBlog); }); 
                 };
-                action.ScriptPath && superdesk.navigation.bind( $(evt.target).attr('href'), callback, $(evt.target).attr('data-Request-title') );
+                action.ScriptPath && superdesk.navigation.bind( $(evt.target).attr('href'), callback, $(evt.target).attr('data-blog-title') );
             });
             evt.preventDefault();
         },
@@ -39,20 +39,9 @@ function($, superdesk, giz, Request)
             this.model.on('read update', this.render, this);
             // this.model.on('delete', function(){ self.el.remove(); })
         },
-        feedModel: function()
-        {
-            var d = this.model.feed();
-            $(d).each(function()
-            {
-                this.origPattern = this.Pattern;
-                this.Pattern = this.Pattern.replace(/\{(\d+)\}/g, '<span class="badge badge-info">$1</span>');
-            });
-            d.ServerUrl = superdesk.apiUrl+'/resources/'; 
-            return d;
-        },
         render: function()
         {
-            $(this.el).tmpl('superdesk/request>item', {Request: this.feedModel ? this.feedModel() : this.model.feed()});
+            $(this.el).tmpl('livedesk>archive/item', {User: this.model.feed()});
             $(this.el).prop('model', this.model).prop('view', this);
             $('.view', this.el).prop('model', this.model).prop('view', this);
             return this;
@@ -151,9 +140,9 @@ function($, superdesk, giz, Request)
         {
             var self = this;
             
-            this.page = { limit: 25, offset: 0, total: null, pagecount: 5 };
+            this.page = { limit: 10, offset: 0, total: null, pagecount: 5 };
             
-            this.collection = new (giz.Collection.extend({ model: Request, href: new giz.Url('Devel/Request') }));
+            this.collection = giz.Auth(new (giz.Collection.extend({ model: Blog, href: new giz.Url('LiveDesk/Blog') })));
             this.collection.on('read update', this.renderList, this);
             
             this._resetEvents = false;
@@ -200,7 +189,7 @@ function($, superdesk, giz, Request)
             this.paginate();
             var data = {pagination: this.page},
                 self = this;
-            superdesk.applyLayout('superdesk/request>list', data, function()
+            superdesk.applyLayout('livedesk>archive/list', data, function()
             {
                 // new ItemView for each models 
                 self.renderList();
