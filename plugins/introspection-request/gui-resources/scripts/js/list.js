@@ -5,7 +5,8 @@ define
     'gizmo/superdesk',
     config.guiJs('superdesk/request', 'models/request'),
     'tmpl!superdesk/request>list',
-    'tmpl!superdesk/request>item'
+    'tmpl!superdesk/request>item',
+    'tmpl!superdesk/request>use-request'
 ],
 function($, superdesk, giz, Request)
 {
@@ -16,7 +17,43 @@ function($, superdesk, giz, Request)
         model: null,
         events: 
         {
-            '.view': { 'click': 'loadRequest' }
+            '.view': { 'click': 'loadRequest' },
+            '.request': { 'click': 'useRequest' }
+        },
+        useRequest: function(evt)
+        {
+            var pat = this.model.get('Pattern'),
+                pattern = pat.replace(/\{(\d+)\}/g, '<label for="req-param-$1"><span class="badge badge-info">$1</span></label>'),
+                p = pat.match(/\{(\d+)\}/g), 
+                params = [],
+                urlSlices = pat.split(/\{\d+\}/);
+            for( var i in p )
+                params.push
+                ({ 
+                    //html: p[i].replace(/\{(\d+)\}/g, '<span class="badge badge-info">$1</span>'), 
+                    idx: p[i].replace(/\{|\}/g, '') 
+                }); 
+            $.tmpl('superdesk/request>use-request', {ServerUrl: superdesk.apiUrl+'/resources/', Params: params, Pattern: pattern}, function(e, o)
+            {
+                var o = $(o);
+                o.modal()
+                    .on('hide', function(){ o.remove(); })
+                    .on('shown', function()
+                    {
+                        var self = $(this);
+                        $(this).find('input:eq(0)').focus();
+                        $(this).find('[data-action="use"]').on('click', function()
+                        {
+                            self.find('[data-is="param"]').each(function(i, e)
+                            {  
+                                urlSlices.splice(i+i+1, 0, $(e).val());
+                            });
+                            window.open( superdesk.apiUrl+'/resources/'+urlSlices.join(''), "_blank" );
+                            o.modal('hide');
+                        });
+                    });
+            });
+            evt.preventDefault();
         },
         loadRequest: function(evt)
         {

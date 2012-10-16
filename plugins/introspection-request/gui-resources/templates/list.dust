@@ -3,7 +3,8 @@
 	.table .btn-group{ visibility: hidden; }
 	.table tr:hover .btn-group{ visibility: visible; }
 	.table{ position: relative; }
-	.table .badge{ margin: 0 2px; }
+	.table .badge, .modal p .badge{ margin: 0 2px; }
+	.modal p label{ display: inline; }
 	.table a{ text-decoration: none; } 
 	.table caption 
 	{
