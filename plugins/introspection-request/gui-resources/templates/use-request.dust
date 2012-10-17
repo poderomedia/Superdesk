@@ -9,6 +9,7 @@
     	{#Params}
 			<input type="text" id="req-param-{idx}" placeholder="_('Param.') {idx}" class="input-small" data-is="param" />{~s}
 		{/Params}
+		<input type="submit" class="hide" />
 		</form>
     </div>
     <div class="modal-footer">

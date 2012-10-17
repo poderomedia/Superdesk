@@ -1,0 +1,12 @@
+{#Request}
+	<td>
+		<a name="{href}" />
+		{Id}
+	</td>
+	<td><a href="{ServerUrl}{origPattern}" class="request"><span class="muted">{ServerUrl}</span>{Pattern|s}</a></td>
+	<td>    
+		<div class="btn-group">
+    		<button class="btn view" href="live-blog/{Id}" data-blog-title="{Title}" data-blog-link="{href}"><i class="icon-info-sign"></i> _('View')</button>
+    	</div>
+    </td>
+{/Request}

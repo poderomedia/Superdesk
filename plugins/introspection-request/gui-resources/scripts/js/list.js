@@ -4,14 +4,16 @@ define
     'jquery/superdesk',
     'gizmo/superdesk',
     config.guiJs('superdesk/request', 'models/request'),
+    'tmpl!superdesk/request>main',
     'tmpl!superdesk/request>list',
-    'tmpl!superdesk/request>item',
+    'tmpl!superdesk/request>request-item',
+    'tmpl!superdesk/request>input-item',
     'tmpl!superdesk/request>use-request'
 ],
 function($, superdesk, giz, Request)
 {
     var 
-    ItemView = giz.View.extend
+    RequestItemView = giz.View.extend
     ({
         tagName: 'tr',
         model: null,
@@ -51,6 +53,7 @@ function($, superdesk, giz, Request)
                             window.open( superdesk.apiUrl+'/resources/'+urlSlices.join(''), "_blank" );
                             o.modal('hide');
                         });
+                        $('form', self).on('submit', function(evt){ $('[data-action="use"]', self).trigger('click'); evt.preventDefault(); });
                     });
             });
             evt.preventDefault();
@@ -89,20 +92,11 @@ function($, superdesk, giz, Request)
         },
         render: function()
         {
-            $(this.el).tmpl('superdesk/request>item', {Request: this.feedModel ? this.feedModel() : this.model.feed()});
+            $(this.el).tmpl('superdesk/request>request-item', {Request: this.feedModel ? this.feedModel() : this.model.feed()});
             $(this.el).prop('model', this.model).prop('view', this);
             $('.view', this.el).prop('model', this.model).prop('view', this);
             return this;
         },
-        update: function(data)
-        {
-            for( var i in data ) this.model.set(i, data[i]);
-            return this.model.sync();
-        },
-        /*remove: function()
-        {
-            this.model.remove().sync();
-        },*/
         hide: function()
         {
             $(this.el).addClass('hide');
@@ -176,7 +170,7 @@ function($, superdesk, giz, Request)
             
             this.collection._list = []
             this.syncing = true;
-            this.collection.xfilter('*').sync({data: {'title.ilike': '%'+src+'%'}, done: function(data){ self.syncing = false; }});
+            this.filterCollection();
             
             $('[data-action="cancel-search"]', self.el).removeClass('hide');
         },
@@ -190,7 +184,7 @@ function($, superdesk, giz, Request)
             
             this.page = { limit: 25, offset: 0, total: null, pagecount: 5 };
             
-            this.collection = new (giz.Collection.extend({ model: Request, href: new giz.Url('Devel/Request') }));
+            this.collection = self.getCollection();
             this.collection.on('read update', this.renderList, this);
             
             this._resetEvents = false;
@@ -205,11 +199,6 @@ function($, superdesk, giz, Request)
             this.syncing = true;
             this.collection.xfilter('*').sync({data: {limit: this.page.limit, offset: this.page.offset},
                 done: function(data){ self.syncing = false; self.page.total = data.total; self.render(); }});
-        },
-        
-        addItem: function(model)
-        {
-            $('table tbody', this.el).append( (new ItemView({ model: model })).render().el );
         },
         
         paginate: function()
@@ -227,8 +216,8 @@ function($, superdesk, giz, Request)
         
         renderList: function()
         {
-            $('table tbody', this.el).html('');
             var self = this;
+            this.clearItems();
             this.collection.each(function(){ self.addItem(this); });
         },
         
@@ -237,19 +226,97 @@ function($, superdesk, giz, Request)
             this.paginate();
             var data = {pagination: this.page},
                 self = this;
-            superdesk.applyLayout('superdesk/request>list', data, function()
+            $.tmpl(self.mainTemplate, data, function(e, o)
             {
-                // new ItemView for each models 
+                self.el.html('').append(o);
                 self.renderList();
             });
             $.superdesk.hideLoader();
+        },
+        /*!
+         * for implementation
+         */
+        mainTemplate: '',
+        addItem: $.noop,
+        clearItems: $.noop,
+        getCollection: $.noop,
+        filterCollection: $.noop
+    }),
+
+    RequestListView = ListView.extend
+    ({
+        mainTemplate: 'superdesk/request>list',
+        getCollection: function()
+        {
+            return new (giz.Collection.extend({ model: Request, href: new giz.Url('Devel/Request') }));
+        },
+        filterCollection: function()
+        {
+            var self = this;
+            return this.collection.xfilter('*').sync({data: {'title.ilike': '%'+src+'%'}, done: function(data){ self.syncing = false; }});
+        },
+        addItem: function(model)
+        {
+            $('table tbody', this.el).append( (new RequestItemView({ model: model })).render().el );
+        },
+        clearItems: function()
+        {
+            $('table tbody', this.el).html('');
         }
+    }),
+    
+    InputListView = ListView.extend
+    ({
         
     }),
-    // TODO table partial view
-    ListView1 = ListView.extend({}),
-    listView = new ListView1({ el: '#area-main' }); 
     
-    return function(){ listView.activate(); };
+    MainView = giz.View.extend
+    ({
+        events:
+        { 
+            '.nav-tabs a':{ 'click': 'tabs' } 
+        },
+        tabs: function(evt)
+        {
+            evt.preventDefault(); 
+            $(evt.currentTarget).tab('show');  
+        },
+        requestListView: null,
+        inputListView: null,
+        activate: function()
+        {
+            var self = this;
+            this.render(function()
+            { 
+                $(superdesk.layoutPlaceholder).html(self.el);
+            });
+        },
+        getInputListView: function()
+        {
+            if( !this.inputListView )
+                this.inputListView = new InputListView();
+            return this.inputListView;
+        },
+        getRequestListView: function()
+        {
+            if( !this.requestListView )
+                this.requestListView = new RequestListView();
+            return this.requestListView
+        },
+        render: function(cb)
+        {
+            var self = this;
+            $.tmpl('superdesk/request>main', {}, function(e, o)
+            {
+                self.el.append(o);
+                self.getRequestListView().setElement(self.el.find('#requests')).activate();
+                $.isFunction(cb) && cb.apply(self);
+            });
+        }
+    });
+    
+    mainView = new MainView({ tagName: 'span' });
+    
+    return function(){ mainView.activate(); };
 });
 

@@ -21,7 +21,7 @@ from __plugin__.development.service import publish_development
 
 @ioc.entity
 def menuAction():
-    return Action('request', N_('Request'), Parent=defaults.menuAction(), Href='/api-requests',
+    return Action('request', N_('Introspection'), Parent=defaults.menuAction(), Href='/api-requests',
                ScriptPath=getPublishedGui('superdesk/request/scripts/js/menu.js'))
 
 @ioc.entity
