@@ -4,15 +4,22 @@ define
     'jquery/superdesk',
     'gizmo/superdesk',
     config.guiJs('superdesk/request', 'models/request'),
+    config.guiJs('superdesk/request', 'models/input'),
     'tmpl!superdesk/request>main',
     'tmpl!superdesk/request>list',
     'tmpl!superdesk/request>request-item',
-    'tmpl!superdesk/request>input-item',
+    'tmpl!superdesk/request>request-details',
     'tmpl!superdesk/request>use-request'
 ],
-function($, superdesk, giz, Request)
+function($, superdesk, giz, Request, Input)
 {
     var 
+    
+    RequestDetailView = giz.View.extend
+    ({
+        
+    }),
+    
     RequestItemView = giz.View.extend
     ({
         tagName: 'tr',
@@ -60,24 +67,38 @@ function($, superdesk, giz, Request)
         },
         loadRequest: function(evt)
         {
-            superdesk.showLoader();
-            var theRequest = $(evt.target).attr('data-Request-link'), self = this;
-            superdesk.getAction('modules.livedesk.edit')
-            .done(function(action)
+            var methods = [this.model.get('Get'), this.model.get('Insert'), this.model.get('Update'), this.model.get('Delete')],
+                availableMethods = [],
+                details = this.model.feed(),
+                dfds = [];
+            
+            details.Methods = []
+            $(methods).each(function(i, m)
             {
-                var callback = function()
-                { 
-                    require([superdesk.apiUrl+action.ScriptPath], function(EditApp){ EditApp(theRequest); }); 
-                };
-                action.ScriptPath && superdesk.navigation.bind( $(evt.target).attr('href'), callback, $(evt.target).attr('data-Request-title') );
+                if( !methods[i] ) return true;
+                var dfd = new $.Deferred;
+                dfds.push(dfd);
+                methods[i].sync().done(function()
+                {
+                    details.Methods.push(methods[i].feed());
+                    dfd.resolve(); 
+                });
             });
+
+            $.when.apply(null, dfds).then(function()
+            {
+                $.tmpl('superdesk/request>request-details', details, function(e, o)
+                {
+                    o = $(o); o.modal().on('hide', function(){ o.remove(); });   
+                });
+            });
+                    
             evt.preventDefault();
         },
         init: function()
         {
             var self = this;
             this.model.on('read update', this.render, this);
-            // this.model.on('delete', function(){ self.el.remove(); })
         },
         feedModel: function()
         {
@@ -106,6 +127,7 @@ function($, superdesk, giz, Request)
             $(this.el).removeClass('hide');
         }
     }),
+    
     ListView = giz.View.extend
     ({
         users: null,
@@ -126,12 +148,12 @@ function($, superdesk, giz, Request)
             }
             if(evt.keyCode == 13) $('[data-action="search"]', this.el).trigger('click');
         },
+        
         cancelSearch: function()
         {
             $('[name="search"]', this.el).val('');
             $('[data-action="search"]', this.el).trigger('click');
         },
-        
         /*!
          * pagination handler
          */
@@ -170,7 +192,7 @@ function($, superdesk, giz, Request)
             
             this.collection._list = []
             this.syncing = true;
-            this.filterCollection();
+            this.filterCollection(src);
             
             $('[data-action="cancel-search"]', self.el).removeClass('hide');
         },
@@ -189,42 +211,59 @@ function($, superdesk, giz, Request)
             
             this._resetEvents = false;
         },
+        /*!
+         * resets event, gizmo.js view bug
+         * syncs the data with the server then renders 
+         */
         activate: function()
         {
             if( this._resetEvents ) this.resetEvents();
             this._resetEvents = true;
-            
             var self = this;
             this.collection._list = [];
             this.syncing = true;
-            this.collection.xfilter('*').sync({data: {limit: this.page.limit, offset: this.page.offset},
+            this.collection.xfilter('*').sync({data: {limit: this.pageInfo().limit, offset: this.pageInfo().offset},
                 done: function(data){ self.syncing = false; self.page.total = data.total; self.render(); }});
         },
-        
+        /*!
+         * get pagination info, can be overwritten to disable it
+         */
+        pageInfo: function()
+        {
+            return this.page;
+        },
+        /*!
+         * calculates pagination
+         */
         paginate: function()
         {
-            this.page.currentpages = [];
-            for( var i= -this.page.pagecount/2; i < this.page.pagecount/2; i++ )
+            this.pageInfo().currentpages = [];
+            for( var i= -this.pageInfo().pagecount/2; i < this.pageInfo().pagecount/2; i++ )
             {
-                var x = parseInt(this.page.offset) + (Math.round(i) * this.page.limit);
-                if( x < 0 || x >= this.page.total ) continue;
-                var currentpage = {offset: x, page: (x/this.page.limit)+1};
+                var x = parseInt(this.pageInfo().offset) + (Math.round(i) * this.pageInfo().limit);
+                if( x < 0 || x >= this.pageInfo().total ) continue;
+                var currentpage = {offset: x, page: (x/this.pageInfo().limit)+1};
                 if( Math.round(i) == 0 ) currentpage.className = 'active';
-                this.page.currentpages.push(currentpage);
+                this.pageInfo().currentpages.push(currentpage);
             }
         },
-        
+        /*!
+         * clears list and adds items back from the collection
+         */
         renderList: function()
         {
             var self = this;
             this.clearItems();
             this.collection.each(function(){ self.addItem(this); });
         },
-        
+        /*!
+         * parses the template, clears the element, calls renderList
+         * hides loader
+         */
         render: function()
         {
             this.paginate();
-            var data = {pagination: this.page},
+            var data = {pagination: this.pageInfo()},
                 self = this;
             $.tmpl(self.mainTemplate, data, function(e, o)
             {
@@ -237,9 +276,21 @@ function($, superdesk, giz, Request)
          * for implementation
          */
         mainTemplate: '',
+        /*!
+         * add 1 item to view
+         */
         addItem: $.noop,
+        /*!
+         * clear items from view
+         */
         clearItems: $.noop,
+        /*!
+         * assigns a collection to use, called once from init usually
+         */
         getCollection: $.noop,
+        /*!
+         * function to filter collection, used by search
+         */
         filterCollection: $.noop
     }),
 
@@ -250,7 +301,7 @@ function($, superdesk, giz, Request)
         {
             return new (giz.Collection.extend({ model: Request, href: new giz.Url('Devel/Request') }));
         },
-        filterCollection: function()
+        filterCollection: function(src)
         {
             var self = this;
             return this.collection.xfilter('*').sync({data: {'title.ilike': '%'+src+'%'}, done: function(data){ self.syncing = false; }});
@@ -265,21 +316,38 @@ function($, superdesk, giz, Request)
         }
     }),
     
-    InputListView = ListView.extend
-    ({
-        
-    }),
+//    InputListView = ListView.extend
+//    ({
+//        mainTemplate: 'superdesk/request>list',
+//        paginate: $.noop,
+//        pageInfo: function(){ return {}; },
+//        getCollection: function()
+//        {
+//            return new (giz.Collection.extend({ model: Input, href: new giz.Url('Devel/Input') }));
+//        },
+//        addItem: function(model)
+//        {
+//            $('table tbody', this.el).append( (new InputItemView({ model: model })).render().el );
+//        },
+//        clearItems: function()
+//        {
+//            $('table tbody', this.el).html('');
+//        }
+//    }),
     
     MainView = giz.View.extend
     ({
+        tagName: 'span',
         events:
         { 
             '.nav-tabs a':{ 'click': 'tabs' } 
         },
         tabs: function(evt)
         {
+            var map = { '#requests': this.getRequestListView };
             evt.preventDefault(); 
-            $(evt.currentTarget).tab('show');  
+            $(evt.currentTarget).tab('show');
+            map[$(evt.currentTarget).attr('href')].call(this, $(evt.currentTarget).attr('href')).activate();
         },
         requestListView: null,
         inputListView: null,
@@ -291,31 +359,37 @@ function($, superdesk, giz, Request)
                 $(superdesk.layoutPlaceholder).html(self.el);
             });
         },
-        getInputListView: function()
-        {
-            if( !this.inputListView )
-                this.inputListView = new InputListView();
-            return this.inputListView;
-        },
-        getRequestListView: function()
+//        getInputListView: function(domElement)
+//        {
+//            if( !this.inputListView )
+//            {
+//                this.inputListView = new InputListView();
+//                this.inputListView.setElement(this.el.find( domElement ));
+//            }
+//            return this.inputListView;
+//        },
+        getRequestListView: function(domElement)
         {
             if( !this.requestListView )
+            {
                 this.requestListView = new RequestListView();
-            return this.requestListView
+                this.requestListView.setElement(this.el.find( domElement ));
+            }
+            return this.requestListView;
         },
         render: function(cb)
         {
             var self = this;
             $.tmpl('superdesk/request>main', {}, function(e, o)
             {
-                self.el.append(o);
-                self.getRequestListView().setElement(self.el.find('#requests')).activate();
+                self.el.html(o);
+                self.getRequestListView(self.el.find('#requests')).activate();
                 $.isFunction(cb) && cb.apply(self);
             });
         }
     });
     
-    mainView = new MainView({ tagName: 'span' });
+    mainView = new MainView();
     
     return function(){ mainView.activate(); };
 });
